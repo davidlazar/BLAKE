@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-typedef struct { 
+typedef struct {
   uint64_t h[8], s[4], t[2];
   int buflen, nullt;
   uint8_t buf[128];

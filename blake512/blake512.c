@@ -17,10 +17,10 @@
   (((uint64_t)U8TO32(p) << 32) | (uint64_t)U8TO32((p) + 4))
 #define U32TO8(p, v) \
     (p)[0] = (uint8_t)((v) >> 24); (p)[1] = (uint8_t)((v) >> 16); \
-    (p)[2] = (uint8_t)((v) >>  8); (p)[3] = (uint8_t)((v)      ); 
+    (p)[2] = (uint8_t)((v) >>  8); (p)[3] = (uint8_t)((v)      );
 #define U64TO8(p, v) \
     U32TO8((p),     (uint32_t)((v) >> 32)); \
-    U32TO8((p) + 4, (uint32_t)((v)      )); 
+    U32TO8((p) + 4, (uint32_t)((v)      ));
 
 const uint8_t sigma[][16] = {
     { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15 },
@@ -93,14 +93,14 @@ void blake512_compress(state *S, const uint8_t *block) {
         G( 1, 5, 9,13, 2);
         G( 2, 6,10,14, 4);
         G( 3, 7,11,15, 6);
-        G( 3, 4, 9,14,14);   
+        G( 3, 4, 9,14,14);
         G( 2, 7, 8,13,12);
         G( 0, 5,10,15, 8);
         G( 1, 6,11,12,10);
-    } 
+    }
 
-    for(i = 0; i < 16; ++i)  S->h[i % 8] ^= v[i]; 
-    for(i = 0; i < 8;  ++i)  S->h[i] ^= S->s[i % 4]; 
+    for(i = 0; i < 16; ++i)  S->h[i % 8] ^= v[i];
+    for(i = 0; i < 8;  ++i)  S->h[i] ^= S->s[i % 4];
 }
 
 void blake512_init(state *S) {
@@ -118,7 +118,7 @@ void blake512_init(state *S) {
 
 // datalen = number of bits
 void blake512_update(state *S, const uint8_t *data, uint64_t datalen) {
-    int left = (S->buflen >> 3); 
+    int left = (S->buflen >> 3);
     int fill = 128 - left;
 
     if (left && (((datalen >> 3) & 0x7F) >= (unsigned) fill)) {
@@ -126,7 +126,7 @@ void blake512_update(state *S, const uint8_t *data, uint64_t datalen) {
         S->t[0] += 1024;
         blake512_compress(S, S->buf);
         data += fill;
-        datalen  -= (fill << 3);       
+        datalen  -= (fill << 3);
         left = 0;
     }
 
@@ -153,15 +153,15 @@ void blake512_final(state *S, uint8_t *digest) {
     U64TO8(msglen + 8, lo);
 
     if (S->buflen == 888) { /* one padding byte */
-        S->t[0] -= 8; 
+        S->t[0] -= 8;
         blake512_update(S, &oo, 8);
     } else {
         if (S->buflen < 888) { /* enough space to fill the block */
             if (S->buflen == 0) S->nullt = 1;
             S->t[0] -= 888 - S->buflen;
             blake512_update(S, padding, 888 - S->buflen);
-        } else { /* NOT enough space, need 2 compressions */ 
-            S->t[0] -= 1024 - S->buflen; 
+        } else { /* NOT enough space, need 2 compressions */
+            S->t[0] -= 1024 - S->buflen;
             blake512_update(S, padding, 1024 - S->buflen);
             S->t[0] -= 888;
             blake512_update(S, padding + 1, 888);
@@ -171,7 +171,7 @@ void blake512_final(state *S, uint8_t *digest) {
         S->t[0] -= 8;
     }
     S->t[0] -= 128;
-    blake512_update(S, msglen, 128);    
+    blake512_update(S, msglen, 128);
 
     U64TO8(digest + 0, S->h[0]);
     U64TO8(digest + 8, S->h[1]);
