@@ -307,9 +307,9 @@ void hmac_blake512_final(hmac_state *S, uint8_t *digest) {
 
 void hmac_blake384_final(hmac_state *S, uint8_t *digest) {
     uint8_t ihash[64];
-    blake512_final(&S->inner, ihash);
-    blake512_update(&S->outer, ihash, 384);
-    blake512_final(&S->outer, digest);
+    blake384_final(&S->inner, ihash);
+    blake384_update(&S->outer, ihash, 384);
+    blake384_final(&S->outer, digest);
     memset(ihash, 0, 64);
 }
 
