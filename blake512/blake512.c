@@ -116,6 +116,19 @@ void blake512_init(state *S) {
     S->s[0] = S->s[1] = S->s[2] = S->s[3] = 0;
 }
 
+void blake384_init(state *S) {
+    S->h[0] = 0xCBBB9D5DC1059ED8ULL;
+    S->h[1] = 0x629A292A367CD507ULL;
+    S->h[2] = 0x9159015A3070DD17ULL;
+    S->h[3] = 0x152FECD8F70E5939ULL;
+    S->h[4] = 0x67332667FFC00B31ULL;
+    S->h[5] = 0x8EB44A8768581511ULL;
+    S->h[6] = 0xDB0C2E0D64F98FA7ULL;
+    S->h[7] = 0x47B5481DBEFA4FA4ULL;
+    S->t[0] = S->t[1] = S->buflen = S->nullt = 0;
+    S->s[0] = S->s[1] = S->s[2] = S->s[3] = 0;
+}
+
 // datalen = number of bits
 void blake512_update(state *S, const uint8_t *data, uint64_t datalen) {
     int left = (S->buflen >> 3);
@@ -145,8 +158,13 @@ void blake512_update(state *S, const uint8_t *data, uint64_t datalen) {
     }
 }
 
-void blake512_final(state *S, uint8_t *digest) {
-    uint8_t msglen[16], zo = 0x01, oo = 0x81;
+// datalen = number of bits
+void blake384_update(state *S, const uint8_t *data, uint64_t datalen) {
+    blake512_update(S, data, datalen);
+}
+
+void blake512_final_h(state *S, uint8_t *digest, uint8_t pa, uint8_t pb) {
+    uint8_t msglen[16];
     uint64_t lo = S->t[0] + S->buflen, hi = S->t[1];
     if (lo < (unsigned) S->buflen) hi++;
     U64TO8(msglen + 0, hi);
@@ -154,7 +172,7 @@ void blake512_final(state *S, uint8_t *digest) {
 
     if (S->buflen == 888) { /* one padding byte */
         S->t[0] -= 8;
-        blake512_update(S, &oo, 8);
+        blake512_update(S, &pa, 8);
     } else {
         if (S->buflen < 888) { /* enough space to fill the block */
             if (S->buflen == 0) S->nullt = 1;
@@ -167,7 +185,7 @@ void blake512_final(state *S, uint8_t *digest) {
             blake512_update(S, padding + 1, 888);
             S->nullt = 1;
         }
-        blake512_update(S, &zo, 8);
+        blake512_update(S, &pb, 8);
         S->t[0] -= 8;
     }
     S->t[0] -= 128;
@@ -183,12 +201,28 @@ void blake512_final(state *S, uint8_t *digest) {
     U64TO8(digest + 56, S->h[7]);
 }
 
+void blake512_final(state *S, uint8_t *digest) {
+    blake512_final_h(S, digest, 0x81, 0x01);
+}
+
+void blake384_final(state *S, uint8_t *digest) {
+    blake512_final_h(S, digest, 0x80, 0x00);
+}
+
 // inlen = number of bytes
 void blake512_hash(uint8_t *out, const uint8_t *in, uint64_t inlen) {
     state S;
     blake512_init(&S);
     blake512_update(&S, in, inlen * 8);
     blake512_final(&S, out);
+}
+
+// inlen = number of bytes
+void blake384_hash(uint8_t *out, const uint8_t *in, uint64_t inlen) {
+    state S;
+    blake384_init(&S);
+    blake384_update(&S, in, inlen * 8);
+    blake384_final(&S, out);
 }
 
 // keylen = number of bytes
@@ -221,10 +255,46 @@ void hmac_blake512_init(hmac_state *S, const uint8_t *_key, uint64_t keylen) {
     memset(keyhash, 0, 64);
 }
 
+// keylen = number of bytes
+void hmac_blake384_init(hmac_state *S, const uint8_t *_key, uint64_t keylen) {
+    const uint8_t *key = _key;
+    uint8_t keyhash[64];
+    uint8_t pad[128];
+    uint64_t i;
+
+    if (keylen > 128) {
+        blake384_hash(keyhash, key, keylen);
+        key = keyhash;
+        keylen = 48;
+    }
+
+    blake384_init(&S->inner);
+    memset(pad, 0x36, 128);
+    for (i = 0; i < keylen; ++i) {
+        pad[i] ^= key[i];
+    }
+    blake384_update(&S->inner, pad, 1024);
+
+    blake384_init(&S->outer);
+    memset(pad, 0x5c, 128);
+    for (i = 0; i < keylen; ++i) {
+        pad[i] ^= key[i];
+    }
+    blake384_update(&S->outer, pad, 1024);
+
+    memset(keyhash, 0, 64);
+}
+
 // datalen = number of bits
 void hmac_blake512_update(hmac_state *S, const uint8_t *data, uint64_t datalen) {
   // update the inner state
   blake512_update(&S->inner, data, datalen);
+}
+
+// datalen = number of bits
+void hmac_blake384_update(hmac_state *S, const uint8_t *data, uint64_t datalen) {
+  // update the inner state
+  blake384_update(&S->inner, data, datalen);
 }
 
 void hmac_blake512_final(hmac_state *S, uint8_t *digest) {
@@ -235,10 +305,26 @@ void hmac_blake512_final(hmac_state *S, uint8_t *digest) {
     memset(ihash, 0, 64);
 }
 
+void hmac_blake384_final(hmac_state *S, uint8_t *digest) {
+    uint8_t ihash[64];
+    blake512_final(&S->inner, ihash);
+    blake512_update(&S->outer, ihash, 384);
+    blake512_final(&S->outer, digest);
+    memset(ihash, 0, 64);
+}
+
 // keylen = number of bytes; inlen = number of bytes
 void hmac_blake512_hash(uint8_t *out, const uint8_t *key, uint64_t keylen, const uint8_t *in, uint64_t inlen) {
     hmac_state S;
     hmac_blake512_init(&S, key, keylen);
     hmac_blake512_update(&S, in, inlen * 8);
     hmac_blake512_final(&S, out);
+}
+
+// keylen = number of bytes; inlen = number of bytes
+void hmac_blake384_hash(uint8_t *out, const uint8_t *key, uint64_t keylen, const uint8_t *in, uint64_t inlen) {
+    hmac_state S;
+    hmac_blake384_init(&S, key, keylen);
+    hmac_blake384_update(&S, in, inlen * 8);
+    hmac_blake384_final(&S, out);
 }

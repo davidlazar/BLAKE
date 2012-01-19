@@ -15,13 +15,29 @@ typedef struct {
 } hmac_state;
 
 void blake512_init(state *);
+void blake384_init(state *);
+
 void blake512_update(state *, const uint8_t *, uint64_t);
+void blake384_update(state *, const uint8_t *, uint64_t);
+
 void blake512_final(state *, uint8_t *);
+void blake384_final(state *, uint8_t *);
+
 void blake512_hash(uint8_t *, const uint8_t *, uint64_t);
+void blake384_hash(uint8_t *, const uint8_t *, uint64_t);
+
+/* HMAC functions: */
 
 void hmac_blake512_init(hmac_state *, const uint8_t *, uint64_t);
+void hmac_blake384_init(hmac_state *, const uint8_t *, uint64_t);
+
 void hmac_blake512_update(hmac_state *, const uint8_t *, uint64_t);
+void hmac_blake384_update(hmac_state *, const uint8_t *, uint64_t);
+
 void hmac_blake512_final(hmac_state *, uint8_t *);
+void hmac_blake384_final(hmac_state *, uint8_t *);
+
 void hmac_blake512_hash(uint8_t *, const uint8_t *, uint64_t, const uint8_t *, uint64_t);
+void hmac_blake384_hash(uint8_t *, const uint8_t *, uint64_t, const uint8_t *, uint64_t);
 
 #endif /* _BLAKE512_H_ */
