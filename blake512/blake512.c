@@ -198,7 +198,7 @@ void hmac_blake512_init(hmac_state *S, const uint8_t *_key, uint64_t keylen) {
     uint8_t pad[128];
     uint64_t i;
 
-    if (keylen > 64) {
+    if (keylen > 128) {
         blake512_hash(keyhash, key, keylen);
         key = keyhash;
         keylen = 64;
