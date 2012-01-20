@@ -1,7 +1,7 @@
 /*
  * The blake512_* and blake384_* functions are largely copied from
  * blake512_light.c and blake384_light.c from the BLAKE website:
- * 
+ *
  *     http://131002.net/blake/
  *
  * The hmac_* functions implement HMAC-BLAKE-512 and HMAC-BLAKE-384.
