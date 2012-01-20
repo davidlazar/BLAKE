@@ -1,7 +1,84 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-#include "blake512.h"
+
+#if BLAKE256
+# include "blake256.h"
+#elif BLAKE512
+# include "blake512.h"
+#endif
+
+#if BLAKE256
+
+// These tests are copied from the original blake256_light.c.
+int runtests256() {
+    int i, v, e;
+    uint8_t data[72], digest[32];
+    uint8_t test1[]= {0x0C, 0xE8, 0xD4, 0xEF, 0x4D, 0xD7, 0xCD, 0x8D, 0x62, 0xDF, 0xDE, 0xD9, 0xD4, 0xED, 0xB0, 0xA7,
+           0x74, 0xAE, 0x6A, 0x41, 0x92, 0x9A, 0x74, 0xDA, 0x23, 0x10, 0x9E, 0x8F, 0x11, 0x13, 0x9C, 0x87};
+    uint8_t test2[]= {0xD4, 0x19, 0xBA, 0xD3, 0x2D, 0x50, 0x4F, 0xB7, 0xD4, 0x4D, 0x46, 0x0C, 0x42, 0xC5, 0x59, 0x3F,
+           0xE5, 0x44, 0xFA, 0x4C, 0x13, 0x5D, 0xEC, 0x31, 0xE2, 0x1B, 0xD9, 0xAB, 0xDC, 0xC2, 0x2D, 0x41};
+
+    for (i = 0; i < 72; ++i) data[i] = 0;
+
+    blake256_hash(digest, data, 1);
+    v = 0; e = 0;
+    for (i = 0; i < 32; ++i) {
+        printf("%02X", digest[i]);
+        if (digest[i] != test1[i]) v = 1;
+    }
+    if (v) { printf("\nerror\n"); e++; }
+    else printf("\nok\n");
+
+    for (i = 0; i < 72; ++i) data[i] = 0;
+
+    blake256_hash(digest, data, 72);
+    v = 0;
+    for (i = 0; i < 32; ++i) {
+        printf("%02X", digest[i]);
+        if (digest[i] != test2[i]) v = 1;
+    }
+    if (v) { printf("\nerror\n"); e++; }
+    else printf("\nok\n");
+
+    return e;
+}
+
+// These tests are copied from the original blake224_light.c.
+int runtests224() {
+    int i, v, e;
+    uint8_t data[72], digest[32];
+    uint8_t test1[]= {0x45, 0x04, 0xCB, 0x03, 0x14, 0xFB, 0x2A, 0x4F, 0x7A, 0x69, 0x2E, 0x69, 0x6E, 0x48, 0x79, 0x12,
+           0xFE, 0x3F, 0x24, 0x68, 0xFE, 0x31, 0x2C, 0x73, 0xA5, 0x27, 0x8E, 0xC5};
+    uint8_t test2[]= {0xF5, 0xAA, 0x00, 0xDD, 0x1C, 0xB8, 0x47, 0xE3, 0x14, 0x03, 0x72, 0xAF, 0x7B, 0x5C, 0x46, 0xB4,
+           0x88, 0x8D, 0x82, 0xC8, 0xC0, 0xA9, 0x17, 0x91, 0x3C, 0xFB, 0x5D, 0x04};
+
+    for (i = 0; i < 72; ++i) data[i] = 0;
+
+    blake224_hash(digest, data, 1);
+    v = 0; e = 0;
+    for (i = 0; i < 28; ++i) {
+        printf("%02X", digest[i]);
+        if (digest[i] != test1[i]) v = 1;
+    }
+    if (v) { printf("\nerror\n"); e++; }
+    else printf("\nok\n");
+
+    for (i = 0; i < 72; ++i) data[i] = 0;
+
+    blake224_hash(digest, data, 72);
+    v = 0;
+    for (i = 0; i < 28; ++i) {
+        printf("%02X", digest[i]);
+        if (digest[i] != test2[i]) v = 1;
+    }
+    if (v) { printf("\nerror\n"); e++; }
+    else printf("\nok\n");
+
+    return e;
+}
+
+#elif BLAKE512
 
 // These tests are copied from the original blake512_light.c.
 int runtests512() {
@@ -16,22 +93,22 @@ int runtests512() {
            0x13, 0x74, 0xB8, 0xA3, 0x8B, 0xBA, 0x79, 0x74, 0xE7, 0xF6, 0xEF, 0x79, 0xCA, 0xB1, 0x6F, 0x22,
            0xCE, 0x1E, 0x64, 0x9D, 0x6E, 0x01, 0xAD, 0x95, 0x89, 0xC2, 0x13, 0x04, 0x5D, 0x54, 0x5D, 0xDE};
 
-    for(i = 0; i < 144; ++i) data[i] = 0;
+    for (i = 0; i < 144; ++i) data[i] = 0;
 
     blake512_hash(digest, data, 1);
     v = 0; e = 0;
-    for(i = 0; i < 64; ++i) {
+    for (i = 0; i < 64; ++i) {
         printf("%02X", digest[i]);
         if (digest[i] != test1[i]) v = 1;
     }
     if (v) { printf("\nerror\n"); e++; }
     else printf("\nok\n");
 
-    for(i = 0; i < 144; ++i) data[i] = 0;
+    for (i = 0; i < 144; ++i) data[i] = 0;
 
     blake512_hash(digest, data, 144);
     v = 0;
-    for(i = 0; i < 64; ++i) {
+    for (i = 0; i < 64; ++i) {
         printf("%02X", digest[i]);
         if (digest[i] != test2[i]) v = 1;
     }
@@ -55,7 +132,7 @@ int runtests384() {
     for (i = 0; i < 144; ++i) data[i] = 0;
 
     blake384_hash(digest, data, 1);
-    v = 0;
+    v = 0; e = 0;
     for (i = 0; i < 48; ++i) {
         printf("%02X", digest[i]);
         if (digest[i] != test1[i]) v = 1;
@@ -77,54 +154,20 @@ int runtests384() {
     return e;
 }
 
-int hash_main(int argc, char **argv) {
-    uint8_t digest[64], buf[1024];
-    size_t c, i;
+#endif
 
-    state S;
-    blake512_init(&S);
-    while (!feof(stdin)) {
-        c = fread(buf, 1, 1024, stdin);
-        blake512_update(&S, buf, c * 8);
-    }
-    blake512_final(&S, digest);
-
-    for(i = 0; i < 64; ++i) {
-        printf("%02x", digest[i]);
-    }
-    printf("\n");
-
-    return 0;
-}
-
-int hmac_main(int argc, char **argv) {
-    uint8_t digest[64], buf[1024];
-    size_t c, i;
-
-    if (argc < 2) {
-        fprintf(stderr, "Usage: %s <key>\n", argv[0]);
-        return 1;
-    }
-
-    hmac_state S;
-    hmac_blake512_init(&S, (uint8_t *) argv[1], strlen(argv[1]));
-    while (!feof(stdin)) {
-        c = fread(buf, 1, 1024, stdin);
-        hmac_blake512_update(&S, buf, c * 8);
-    }
-    hmac_blake512_final(&S, digest);
-
-    for(i = 0; i < 64; ++i) {
-        printf("%02x", digest[i]);
-    }
-    printf("\n");
-
-    return 0;
-}
-
-int main(int argc, char **argv) {
-    //return runtests512();
-    //return runtests384();
-    //return hash_main(argc, argv);
-    return hmac_main(argc, argv);
+int main() {
+    int e = 0;
+#if BLAKE256
+    printf("BLAKE-256:\n");
+    e += runtests256();
+    printf("\nBLAKE-224:\n");
+    e += runtests224();
+#elif BLAKE512
+    printf("BLAKE-512:\n");
+    e += runtests512();
+    printf("\nBLAKE-384:\n");
+    e += runtests384();
+#endif
+    return e;
 }
