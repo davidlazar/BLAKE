@@ -1,8 +1,11 @@
 /*
- * The blake512_* functions are copied from blake512_light.c from the BLAKE
- * website: http://131002.net/blake/
+ * The blake512_* and blake384_* functions are largely copied from
+ * blake512_light.c and blake384_light.c from the BLAKE website:
+ * 
+ *     http://131002.net/blake/
  *
- * The hmac_* functions implement HMAC (RFC 2104) for BLAKE-512.
+ * The hmac_* functions implement HMAC-BLAKE-512 and HMAC-BLAKE-384.
+ * HMAC is specified by RFC 2104.
  */
 
 #include <string.h>
