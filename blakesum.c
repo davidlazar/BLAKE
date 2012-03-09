@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
     size_t keylen;
 
     if (argc < 2) {
-        printf("Usage %s <key> [FILE]\n", argv[0]);
+        printf("Usage: %s <key> [FILE]\n", argv[0]);
         return 1;
     } else if (argc < 3) {
         file = "-";
