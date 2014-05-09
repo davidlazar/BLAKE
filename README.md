@@ -19,11 +19,11 @@ Build the hash functions:
 
 Test them:
 
-    $ echo "Hello World" | ./bin/blake512hmac secretkey
-    519668fda76703526f58da8adb5c888e4a9865ec1ea50916b66d830ccbe6d934547f2f9874c94834c50617ffe21edba5c5308c6d6b9fc9c8e76a7716ce6d7a5e
+    $ echo -n "Hello World" | ./bin/blake512hmac secretkey
+    cc0f6967c2377ce286f12392339d91af453e1e3979c35cdd45c5c31ab3fd64d4a998e00b5c703b03c16fc3e95904c4ff3de2ac5861066d8047338ce289532cbd
 
-    $ echo "Hello World" | ./bin/blake384sum 
-    4a25a70e1d0897c59251752e7a2be5c179edec433f65f628e9f9662d25a081a6b20e649532be38558de036dcce8b1581
+    $ echo -n "Hello World" | ./bin/blake384sum
+    8e0b9432b32a4a6b8fb5a922a00add624ed4185267da30274c573149fa133f8677ed4a4a828aca0cc02257095144a312
 
 # TODO
 
