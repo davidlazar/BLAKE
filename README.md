@@ -1,5 +1,3 @@
-# About
-
 This project provides an HMAC implementation based on BLAKE.
 In particular, this project provides
 
@@ -30,9 +28,3 @@ Test them:
 # TODO
 
 * PBKDF2 based on BLAKE.
-
-# Contributing
-
-This project is available on [GitHub](https://github.com/davidlazar/BLAKE) and [Bitbucket](https://bitbucket.org/davidlazar/blake). You may contribute changes using either.
-
-Please report bugs and feature requests using the [GitHub issue tracker](https://github.com/davidlazar/BLAKE/issues).
